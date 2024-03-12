@@ -45,6 +45,8 @@ device = "cpu"  # cuda以外的设备，等mps优化后加入
 
 
 def main():
+    """Assume Single Node Multi GPUs Training Only"""
+    # assert torch.cuda.is_available() or torch.backends.mps.is_available(), "Only GPU training is allowed."
 
     if torch.cuda.is_available():
         n_gpus = torch.cuda.device_count()
