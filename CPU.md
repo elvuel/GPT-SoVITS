@@ -1,0 +1,1 @@
+- Take refrence: https://github.com/RVC-Boss/GPT-SoVITS/issues/373

@@ -118,7 +118,7 @@ def main(args):
     os.environ["MASTER_ADDR"]="localhost"
     trainer: Trainer = Trainer(
         max_epochs=config["train"]["epochs"],
-        accelerator="gpu" if torch.cuda.is_available() else "cpu",
+        accelerator="cpu",
         # val_check_interval=9999999999999999999999,###不要验证
         # check_val_every_n_epoch=None,
         limit_val_batches=0,
