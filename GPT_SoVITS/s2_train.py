@@ -48,8 +48,12 @@ def main():
     """Assume Single Node Multi GPUs Training Only"""
     # assert torch.cuda.is_available() or torch.backends.mps.is_available(), "Only GPU training is allowed."
 
-    if torch.cuda.is_available():
-        n_gpus = torch.cuda.device_count()
+    # if torch.backends.mps.is_available():
+    #     n_gpus = 1
+    # else:
+    #     n_gpus = torch.cuda.device_count()
+    
+    n_gpus = torch.cuda.device_count()
     if n_gpus == 0:
         n_gpus = 1
     os.environ["MASTER_ADDR"] = "localhost"
