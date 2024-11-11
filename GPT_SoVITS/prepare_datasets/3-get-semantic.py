@@ -1,20 +1,34 @@
-import os
-
-inp_text = os.environ.get("inp_text")
-exp_name = os.environ.get("exp_name")
-i_part = os.environ.get("i_part")
-all_parts = os.environ.get("all_parts")
-if "_CUDA_VISIBLE_DEVICES" in os.environ:
-     os.environ["CUDA_VISIBLE_DEVICES"] = os.environ["_CUDA_VISIBLE_DEVICES"]
-opt_dir = os.environ.get("opt_dir")
-pretrained_s2G = os.environ.get("pretrained_s2G")
-s2config_path = os.environ.get("s2config_path")
-version=os.environ.get("version","v2")
+import os,sys,json,base64
 import torch
-is_half = eval(os.environ.get("is_half", "True")) and torch.cuda.is_available()
 import math, traceback
 import multiprocessing
-import sys, pdb
+import pdb
+
+if len(sys.argv) == 1:
+    inp_text = os.environ.get("inp_text")
+    exp_name = os.environ.get("exp_name")
+    i_part = os.environ.get("i_part")
+    all_parts = os.environ.get("all_parts")
+    if "_CUDA_VISIBLE_DEVICES" in os.environ:
+        os.environ["CUDA_VISIBLE_DEVICES"] = os.environ["_CUDA_VISIBLE_DEVICES"]
+    opt_dir = os.environ.get("opt_dir")
+    pretrained_s2G = os.environ.get("pretrained_s2G")
+    s2config_path = os.environ.get("s2config_path")
+    version=os.environ.get("version","v2")
+    is_half = eval(os.environ.get("is_half", "True")) and torch.cuda.is_available()
+else:
+    config = json.loads(base64.b64decode(sys.argv[1]).decode("utf-8"))
+    inp_text = config["inp_text"]
+    exp_name = config["exp_name"]
+    i_part = config["i_part"]
+    all_parts = config["all_parts"]
+    if "_CUDA_VISIBLE_DEVICES" in config:
+        os.environ["CUDA_VISIBLE_DEVICES"] = config["_CUDA_VISIBLE_DEVICES"]
+    opt_dir = config["opt_dir"]
+    pretrained_s2G = config["pretrained_s2G"]
+    s2config_path = config["s2config_path"]
+    version = config.get("version", "v2")
+    is_half = eval(config["is_half"]) and torch.cuda.is_available()
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)

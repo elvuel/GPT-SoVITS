@@ -1,18 +1,33 @@
 # -*- coding: utf-8 -*-
 
-import sys,os
-inp_text=                           os.environ.get("inp_text")
-inp_wav_dir=                        os.environ.get("inp_wav_dir")
-exp_name=                           os.environ.get("exp_name")
-i_part=                             os.environ.get("i_part")
-all_parts=                          os.environ.get("all_parts")
-if "_CUDA_VISIBLE_DEVICES" in os.environ:
-     os.environ["CUDA_VISIBLE_DEVICES"] = os.environ["_CUDA_VISIBLE_DEVICES"]
-from feature_extractor import cnhubert
-opt_dir=                            os.environ.get("opt_dir")
-cnhubert.cnhubert_base_path=                os.environ.get("cnhubert_base_dir")
+import sys,os,json,base64
 import torch
-is_half = eval(os.environ.get("is_half", "True")) and torch.cuda.is_available()
+from feature_extractor import cnhubert
+
+if len(sys.argv) == 1:
+    inp_text=                           os.environ.get("inp_text")
+    inp_wav_dir=                        os.environ.get("inp_wav_dir")
+    exp_name=                           os.environ.get("exp_name")
+    i_part=                             os.environ.get("i_part")
+    all_parts=                          os.environ.get("all_parts")
+    if "_CUDA_VISIBLE_DEVICES" in os.environ:
+        os.environ["CUDA_VISIBLE_DEVICES"] = os.environ["_CUDA_VISIBLE_DEVICES"]
+
+    opt_dir=                            os.environ.get("opt_dir")
+    cnhubert.cnhubert_base_path=                os.environ.get("cnhubert_base_dir")
+    is_half = eval(os.environ.get("is_half", "True")) and torch.cuda.is_available()
+else:
+    config = json.loads(base64.b64decode(sys.argv[1]).decode("utf-8"))
+    inp_text = config["inp_text"]
+    inp_wav_dir = config["inp_wav_dir"]
+    exp_name = config["exp_name"]
+    i_part = config["i_part"]
+    all_parts = config["all_parts"]
+    if "_CUDA_VISIBLE_DEVICES" in config:
+        os.environ["CUDA_VISIBLE_DEVICES"] = config["_CUDA_VISIBLE_DEVICES"]
+    opt_dir = config["opt_dir"]
+    cnhubert.cnhubert_base_path = config["cnhubert_base_dir"]
+    is_half = eval(config["is_half"]) and torch.cuda.is_available()
 
 import pdb,traceback,numpy as np,logging
 from scipy.io import wavfile
