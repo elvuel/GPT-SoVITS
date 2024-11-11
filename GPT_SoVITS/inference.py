@@ -155,9 +155,9 @@ def get_first(text):
     text = re.split(pattern, text)[0].strip()
     return text
 
-def clean_text_inf(text, language):
-    phones, word2ph, norm_text = clean_text(text, language)
-    phones = cleaned_text_to_sequence(phones)
+def clean_text_inf(text, language, version):
+    phones, word2ph, norm_text = clean_text(text, language, version)
+    phones = cleaned_text_to_sequence(phones, version)
     return phones, word2ph, norm_text
 
 def get_bert_inf(phones, word2ph, norm_text, language):
