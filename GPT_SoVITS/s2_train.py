@@ -17,6 +17,14 @@ import logging, traceback
 logging.getLogger("matplotlib").setLevel(logging.INFO)
 logging.getLogger("h5py").setLevel(logging.INFO)
 logging.getLogger("numba").setLevel(logging.INFO)
+
+# mp
+# fix for : (errno: 98 - Address already in use) in sample process
+# ref: https://github.com/microsoft/DeepSpeed/issues/3916
+import random
+import time
+random.seed(time.process_time())
+
 from random import randint
 from module import commons
 
