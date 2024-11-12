@@ -449,7 +449,7 @@ if(infer_device=="cpu"):infer_is_half=False
 
 cache= {}
 def get_tts_wav(output_dir, seed, gpt_weight_path, sovits_weight_path, ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut="按中文句号。切", pad_duration=0, top_k=20, top_p=0.6, temperature=0.6, ref_free = False, speed=1,if_freeze=False,inp_refs=None):
-    global version, dict_language
+    global version, dict_language, cache
     if output_dir is None or output_dir == "":
         output_dir = tmp
 
@@ -466,7 +466,7 @@ def get_tts_wav(output_dir, seed, gpt_weight_path, sovits_weight_path, ref_wav_p
     t2s_model = t2s_model.to(infer_device)
     t2s_model.eval()
     total = sum([param.nelement() for param in t2s_model.parameters()])
-    print("Number of parameter: %.2fM" % (total / 1e6))
+    print("GPT_Weight Number of parameter: %.2fM" % (total / 1e6))
     
     # MP 对应 change_sovits_weights逻辑
     # hps = utils.get_hparams(stage=2) # ！！！ get_hparams需要解析命令行, 在infer-web.py中不能添加utils.get_hparams中相关的参数...否则报错，可以考虑修改utils.get_hparams
@@ -494,7 +494,8 @@ def get_tts_wav(output_dir, seed, gpt_weight_path, sovits_weight_path, ref_wav_p
         # vq_model = vq_model.to(device)
         vq_model = vq_model.to(infer_device)
     vq_model.eval()
-    print(vq_model.load_state_dict(dict_s2["weight"], strict=False))
+    print("SoVitsWeight", vq_model.load_state_dict(dict_s2["weight"], strict=False))
+    print("SoVitsWeight Version", hps.model.version)
     dict_language = dict_language_v1 if version =='v1' else dict_language_v2
    
     # 这里开始接近原始代码
@@ -603,7 +604,7 @@ def get_tts_wav(output_dir, seed, gpt_weight_path, sovits_weight_path, ref_wav_p
         phones1,bert1,norm_text1=get_phones_and_bert(prompt_text, prompt_language, version)
     
     # 停顿辅助
-    texts, pauses_map = rjust_texts_with_pause_directive(texts)
+    # texts, pauses_map = rjust_texts_with_pause_directive(texts)
     
     # for text in texts:
     for i_text, text in enumerate(texts):
@@ -652,8 +653,8 @@ def get_tts_wav(output_dir, seed, gpt_weight_path, sovits_weight_path, ref_wav_p
                     refers.append(refer)
                 except:
                     traceback.print_exc()
-        if(len(refers)==0):refers = [get_spepc(hps, ref_wav_path).to(dtype).to(device)]
-        audio = (vq_model.decode(pred_semantic, torch.LongTensor(phones2).to(device).unsqueeze(0), refers,speed=speed).detach().cpu().numpy()[0, 0])
+        if(len(refers)==0):refers = [get_spepc(hps, ref_wav_path).to(dtype).to(infer_device)]
+        audio = (vq_model.decode(pred_semantic, torch.LongTensor(phones2).to(infer_device).unsqueeze(0), refers,speed=speed).detach().cpu().numpy()[0, 0])
         max_audio=np.abs(audio).max()#简单防止16bit爆音
         if max_audio>1:audio/=max_audio
         audio_opt.append(audio)
@@ -743,6 +744,7 @@ if __name__ == "__main__":
     try:
         get_tts_wav(output_dir,seed, gpt_weight_path, sovits_weight_path, ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut, pad_duration, top_k, top_p, temperature, ref_free, speed, if_freeze, inp_refs)
     except Exception as e:
+        traceback.print_exc()
         logging.error(str(e))
         os._exit(9875)
     
